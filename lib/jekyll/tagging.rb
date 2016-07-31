@@ -27,7 +27,9 @@ module Jekyll
 
     @types = [:page, :feed]
 
-    class << self; attr_accessor :types, :site; end
+    class << self
+      attr_accessor :types, :site
+    end
 
     def generate(site)
       self.class.site = self.site = site
@@ -115,23 +117,12 @@ module Jekyll
   end
 
   module Filters
-
     include Helpers
 
     def tag_cloud(site)
       active_tag_data.map { |tag, set|
         tag_link(tag, tag_url(tag), :class => "set-#{set}")
       }.join(' ')
-    end
-
-    def tag_link(tag, url = tag_url(tag), html_opts = nil)
-      html_opts &&= ' ' << html_opts.map { |k, v| %Q{#{k}="#{v}"} }.join(' ')
-      %Q{<a href="#{url}"#{html_opts}>#{tag}</a>}
-    end
-
-    def tag_url(tag, type = :page, site = Tagger.site)
-      url = File.join('', site.config["baseurl"].to_s, site.config["tag_#{type}_dir"], ERB::Util.u(jekyll_tagging_slug(tag)))
-      site.permalink_style == :pretty || site.config['tag_permalink_style'] == 'pretty' ? url << '/' : url << '.html'
     end
 
     def tags(obj)
@@ -151,6 +142,18 @@ module Jekyll
       return site.config['tag_data'] unless site.config["ignored_tags"]
       site.config["tag_data"].reject { |tag, set| site.config["ignored_tags"].include? tag }
     end
+
+    private
+
+      def tag_link(tag, url = tag_url(tag), html_opts = nil)
+        html_opts &&= ' ' << html_opts.map { |k, v| %Q{#{k}="#{v}"} }.join(' ')
+        %Q{<a href="#{url}"#{html_opts}>#{tag}</a>}
+      end
+
+      def tag_url(tag, type = :page, site = Tagger.site)
+        url = File.join('', site.config["baseurl"].to_s, site.config["tag_#{type}_dir"], ERB::Util.u(jekyll_tagging_slug(tag)))
+        site.permalink_style == :pretty || site.config['tag_permalink_style'] == 'pretty' ? url << '/' : url << '.html'
+      end
   end
 
 end
